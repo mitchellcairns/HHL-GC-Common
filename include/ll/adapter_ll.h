@@ -13,6 +13,7 @@ void adapter_ll_reboot_with_memory(adapter_reboot_memory_u *msg);
 void adapter_ll_get_reboot_memory(adapter_reboot_memory_u *msg);
 bool adapter_ll_gpio_read(uint32_t gpio);
 void adapter_ll_hardware_setup();
-uint32_t adapter_ll_get_timestamp_us_32();
+uint32_t adapter_ll_get_timestamp_us();
+void adapter_ll_usb_task_start();
 
 #endif

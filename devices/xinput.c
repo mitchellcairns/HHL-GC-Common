@@ -25,21 +25,27 @@ void xinput_hid_idle(joybus_input_s *joybus_data)
     if (!joybus_data[0].port_ready && (joybus_data[0].port_itf > -1))
         joybus_data[0].port_ready = tud_xinput_n_ready(joybus_data[0].port_itf);
 
+    #if (ADAPTER_PORT_COUNT>1)
     if (!joybus_data[1].port_ready && (joybus_data[1].port_itf > -1))
         joybus_data[1].port_ready = tud_xinput_n_ready(joybus_data[1].port_itf);
+    #endif
 
+    #if (ADAPTER_PORT_COUNT>2)
     if (!joybus_data[2].port_ready && (joybus_data[2].port_itf > -1))
         joybus_data[2].port_ready = tud_xinput_n_ready(joybus_data[2].port_itf);
+    #endif
 
+    #if (ADAPTER_PORT_COUNT>3)
     if (!joybus_data[3].port_ready && (joybus_data[3].port_itf > -1))
         joybus_data[3].port_ready = tud_xinput_n_ready(joybus_data[3].port_itf);
+    #endif
 }
 
 void xinput_hid_report(joybus_input_s *joybus_data)
 {
-    static xid_input_s data[4] = {0};
+    static xid_input_s data[ADAPTER_PORT_COUNT] = {0};
 
-    for (uint i = 0; i < 4; i++)
+    for (uint i = 0; i < ADAPTER_PORT_COUNT; i++)
     {
         if(joybus_data[i].port_itf<0) continue;
 

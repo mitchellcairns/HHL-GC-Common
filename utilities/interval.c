@@ -47,7 +47,7 @@ bool interval_resettable_run(uint32_t timestamp, uint32_t interval, bool reset, 
   }
 
   // Clear variable
-  uint32_t diff = 0;
+  uint64_t diff = 0;
 
   // Handle edge case where time has
   // looped around and is now less

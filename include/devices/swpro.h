@@ -3,6 +3,8 @@
 
 #include "adapter_includes.h"
 
+#define SWPRO_HID_REPORT_LEN (ADAPTER_MCU_TYPE==MCU_TYPE_ESP32 ? 63 : 64)
+
 extern const tusb_desc_device_t swpro_device_descriptor;
 extern const uint8_t swpro_hid_report_descriptor[];
 extern const uint8_t swpro_configuration_descriptor[];

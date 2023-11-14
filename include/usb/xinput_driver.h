@@ -16,6 +16,8 @@ extern const tusb_desc_device_t xid_device_descriptor;
 extern const uint8_t xid_configuration_descriptor[];
 extern const char *xid_string_descriptor[];
 
+void xinputd_install(void);
+
 void xinputd_init(void);
 void xinputd_reset(uint8_t rhport);
 uint16_t xinputd_open(uint8_t rhport, tusb_desc_interface_t const * desc_itf, uint16_t max_len);

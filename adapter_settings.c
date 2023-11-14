@@ -5,7 +5,6 @@ adapter_settings_s global_loaded_settings = {0};
 // Internal functions for command processing
 void _generate_mac()
 {
-  printf("Generated MAC: ");
   for(uint8_t i = 0; i < 6; i++)
   {
     global_loaded_settings.switch_mac_address[0][i] = adapter_ll_generate_random_8();
@@ -13,7 +12,6 @@ void _generate_mac()
     global_loaded_settings.switch_mac_address[2][i] = adapter_ll_generate_random_8();
     global_loaded_settings.switch_mac_address[3][i] = adapter_ll_generate_random_8();
   }
-  printf("\n");
 }
 
 void settings_save()
@@ -35,6 +33,8 @@ bool settings_load()
     settings_save();
     return false;
   }
+
+  _generate_mac();
 
   return true;
 }

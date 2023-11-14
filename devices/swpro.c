@@ -131,14 +131,43 @@ const uint8_t swpro_hid_report_descriptor[] = {
     // 203 bytes
 };
 
+#define SWPRO_DESC_BASE_SIZE 32
+#define SWPRO_DESC_SIZE (SWPRO_DESC_BASE_SIZE + (ADAPTER_PORT_COUNT*32))
+
 const uint8_t swpro_configuration_descriptor[] = {
     // Configuration number, interface count, string index, total length, attribute, power in mA
-    TUD_CONFIG_DESCRIPTOR(1, 5, 0, 160, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 500),
+    TUD_CONFIG_DESCRIPTOR(1, (1+ADAPTER_PORT_COUNT), 0, SWPRO_DESC_SIZE, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 500),
 
-    // Interface 0
+    // INTF 0 Interface for WebUSB
+    // Interface
     9,
     TUSB_DESC_INTERFACE,
     0x00,
+    0x00,
+    0x02,
+    TUSB_CLASS_VENDOR_SPECIFIC,
+    0x00,
+    0x00,
+    0x08,
+    // Endpoint Descriptor
+    7,
+    TUSB_DESC_ENDPOINT,
+    0x81,
+    TUSB_XFER_BULK,
+    U16_TO_U8S_LE(64),
+    0,
+    // Endpoint Descriptor
+    7,
+    TUSB_DESC_ENDPOINT,
+    0x01,
+    TUSB_XFER_BULK,
+    U16_TO_U8S_LE(64),
+    0,
+
+    // Interface 1
+    9,
+    TUSB_DESC_INTERFACE,
+    0x01,
     0x00,
     0x02,
     TUSB_CLASS_HID,
@@ -156,22 +185,23 @@ const uint8_t swpro_configuration_descriptor[] = {
     // Endpoint Descriptor
     7,
     TUSB_DESC_ENDPOINT,
-    0x81,
+    0x82,
     TUSB_XFER_INTERRUPT,
     U16_TO_U8S_LE(64),
     8,
     // Endpoint Descriptor
     7,
     TUSB_DESC_ENDPOINT,
-    0x01,
+    0x02,
     TUSB_XFER_INTERRUPT,
     U16_TO_U8S_LE(64),
     8,
 
-    // Interface 1
+    #if(ADAPTER_PORT_COUNT>1)
+    // Interface 2
     9,
     TUSB_DESC_INTERFACE,
-    0x01,
+    0x02,
     0x00,
     0x02,
     TUSB_CLASS_HID,
@@ -200,11 +230,13 @@ const uint8_t swpro_configuration_descriptor[] = {
     TUSB_XFER_INTERRUPT,
     U16_TO_U8S_LE(64),
     8,
+    #endif
 
-    // Interface 2
+    #if(ADAPTER_PORT_COUNT>2)
+    // Interface 3
     9,
     TUSB_DESC_INTERFACE,
-    0x02,
+    0x03,
     0x00,
     0x02,
     TUSB_CLASS_HID,
@@ -233,11 +265,13 @@ const uint8_t swpro_configuration_descriptor[] = {
     TUSB_XFER_INTERRUPT,
     U16_TO_U8S_LE(64),
     8,
+    #endif
 
-    // Interface 3
+    #if(ADAPTER_PORT_COUNT>3)
+    // Interface 4
     9,
     TUSB_DESC_INTERFACE,
-    0x03,
+    0x04,
     0x00,
     0x02,
     TUSB_CLASS_HID,
@@ -266,32 +300,8 @@ const uint8_t swpro_configuration_descriptor[] = {
     TUSB_XFER_INTERRUPT,
     U16_TO_U8S_LE(64),
     8,
+    #endif
 
-    // Alternate Interface for WebUSB
-    // Interface
-    9,
-    TUSB_DESC_INTERFACE,
-    0x04,
-    0x00,
-    0x02,
-    TUSB_CLASS_VENDOR_SPECIFIC,
-    0x00,
-    0x00,
-    0x08,
-    // Endpoint Descriptor
-    7,
-    TUSB_DESC_ENDPOINT,
-    0x85,
-    TUSB_XFER_BULK,
-    U16_TO_U8S_LE(64),
-    0,
-    // Endpoint Descriptor
-    7,
-    TUSB_DESC_ENDPOINT,
-    0x05,
-    TUSB_XFER_BULK,
-    U16_TO_U8S_LE(64),
-    0,
 };
 
 /**--------------------------**/
@@ -304,24 +314,31 @@ uint32_t _timeout = 0;
 
 void swpro_hid_idle(joybus_input_s *joybus_data)
 {
+    
     if (!joybus_data[0].port_ready && (joybus_data[0].port_itf > -1))
         joybus_data[0].port_ready = tud_hid_n_ready(joybus_data[0].port_itf);
 
+    #if(ADAPTER_PORT_COUNT>1)
     if (!joybus_data[1].port_ready && (joybus_data[1].port_itf > -1))
         joybus_data[1].port_ready = tud_hid_n_ready(joybus_data[1].port_itf);
+    #endif
 
+    #if(ADAPTER_PORT_COUNT>2)
     if (!joybus_data[2].port_ready && (joybus_data[2].port_itf > -1))
         joybus_data[2].port_ready = tud_hid_n_ready(joybus_data[2].port_itf);
+    #endif
 
+    #if(ADAPTER_PORT_COUNT>3)
     if (!joybus_data[3].port_ready && (joybus_data[3].port_itf > -1))
         joybus_data[3].port_ready = tud_hid_n_ready(joybus_data[3].port_itf);
+    #endif
 }
 
 void swpro_hid_report(joybus_input_s *joybus_data)
 {
-  static sw_input_s data[4] = {0};
+  static sw_input_s data[ADAPTER_PORT_COUNT] = {0};
 
-  for (uint i = 0; i < 4; i++)
+  for (uint i = 0; i < ADAPTER_PORT_COUNT; i++)
   {
     if (joybus_data[i].port_itf < 0) continue;
 

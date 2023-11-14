@@ -1,10 +1,10 @@
 #include "switch_commands.h"
 
 // This C file handles various Switch gamepad commands (OUT reports)
-uint8_t _switch_in_command_buffer[4][64] = {0};
-uint8_t _switch_in_report_id[4] = {0};
-uint16_t _switch_in_command_len[4] = {64,64,64,64};
-bool _switch_in_command_got[4] = {0};
+static uint8_t _switch_in_command_buffer[4][64] = {0};
+static uint8_t _switch_in_report_id[4] = {0};
+static uint16_t _switch_in_command_len[4] = {64,64,64,64};
+static bool _switch_in_command_got[4] = {0};
 
 uint8_t _switch_reporting_mode[4] = {0x3F,0x3F,0x3F,0x3F};
 
@@ -170,7 +170,7 @@ void info_handler(uint8_t itf, uint8_t info_code)
       break;
   }
 
-  tud_hid_n_report(itf, _switch_command_report_id[itf], _switch_command_buffer[itf], 64);
+  tud_hid_n_report(itf, _switch_command_report_id[itf], _switch_command_buffer[itf], SWPRO_HID_REPORT_LEN);
 }
 
 void pairing_set(uint8_t itf, uint8_t phase)
@@ -330,16 +330,17 @@ void command_handler(uint8_t itf, uint8_t command, const uint8_t *data, uint16_t
   printf("Sent: ");
   for(uint8_t i = 0; i < 32; i++)
   {
-    printf("%X, ", _switch_command_buffer[i]);
+    printf("%X, ", (unsigned int) _switch_command_buffer[i]);
   }
   printf("\n");
 
-  tud_hid_n_report(itf, 0x21, _switch_command_buffer[itf], 64);
+  tud_hid_n_report(itf, 0x21, _switch_command_buffer[itf], SWPRO_HID_REPORT_LEN);
 }
 
 // Handles an OUT report and responds accordingly.
 void report_handler(uint8_t itf, uint8_t report_id, uint8_t *data, uint16_t len)
 {
+
   switch(report_id)
   {
     // We have command data and possibly rumble
@@ -371,8 +372,6 @@ uint8_t _unknown_thing()
 
   return out;
 }
-
-#define DEBUG_IMU_VAL 8
 
 // PUBLIC FUNCTIONS
 void switch_commands_process(uint8_t itf, sw_input_s *input_data)
@@ -412,7 +411,7 @@ void switch_commands_process(uint8_t itf, sw_input_s *input_data)
 
       //printf("V: %d, %d\n", _switch_command_buffer[46], _switch_command_buffer[47]);
 
-      tud_hid_n_report(itf, _switch_command_report_id[itf], _switch_command_buffer[itf], 64);
+      tud_hid_n_report(itf, _switch_command_report_id[itf], _switch_command_buffer[itf], SWPRO_HID_REPORT_LEN);
     }
   }
 }

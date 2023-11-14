@@ -116,17 +116,6 @@ bool adapter_usb_start(input_mode_t mode)
     return tusb_init();
 }
 
-// This is used to get the sent state, and reset it
-bool adapter_usb_sent_ok()
-{
-  if (_usb_sent_ok)
-  {
-    _usb_sent_ok = false;
-    return true;
-  }
-  return false;
-}
-
 void adapter_usb_report(joybus_input_s *input)
 {
   if(!_usb_hid_cb) return;
@@ -150,12 +139,21 @@ void adapter_comms_task(uint32_t timestamp)
         joybus_itf_poll(&_adapter_joybus_inputs);
         adapter_usb_report(_adapter_joybus_inputs);
     }
-    else adapter_usb_idle(_adapter_joybus_inputs);
+    else 
+    {
+        #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
+        tud_task();
+        #endif
+        adapter_usb_idle(_adapter_joybus_inputs);
+    }
+
 }
 
 void adapter_main_init()
 {
     adapter_ll_hardware_setup();
+
+    switch_analog_calibration_init();
 
     rgb_init();
 
@@ -178,7 +176,7 @@ void adapter_main_init()
         }
         else
         {
-            mode = INPUT_MODE_SWPRO;//global_loaded_settings.input_mode;
+            mode = global_loaded_settings.input_mode;
         }
 
         switch (mode)
@@ -205,20 +203,28 @@ void adapter_main_init()
 
     rgb_set_dirty();
 
-    adapter_usb_start(mode);
+    if(!adapter_usb_start(mode))
+    {
+        rgb_set_all(COLOR_RED.color);
+        rgb_set_dirty();
+    }
+    else
+    {
+        adapter_ll_usb_task_start();
+    }
 }
 
 void adapter_main_loop()
 {
     for(;;)
     {
-        uint32_t _t = adapter_ll_get_timestamp_us_32();
+        uint32_t _t = adapter_ll_get_timestamp_us();
 
         adapter_ll_save_check();
 
         rgb_task(_t);
-        tud_task();
         adapter_comms_task(_t);
         adapter_mode_cycle_task(_t);
+
     }
 }

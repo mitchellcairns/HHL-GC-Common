@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "adapter_includes.h"
 #include "xinput_driver.h"
 #include "adapter.h"
 
@@ -32,11 +33,15 @@ const tusb_desc_device_t xid_device_descriptor =
 
         .bNumConfigurations = 0x01};
 
+#define XINPUT_EP_SIZE_LENGTH 39
+#define XINPUT_EP_SIZE_BASE 9
+#define XINPUT_CONFIG_DESC_SIZE (XINPUT_EP_SIZE_BASE + (XINPUT_EP_SIZE_LENGTH*ADAPTER_PORT_COUNT))
+
 const uint8_t xid_configuration_descriptor[] = {
     0x09,       // bLength
     0x02,       // bDescriptorType (Configuration)
-    165, 0x00, // wTotalLength 48
-    0x04,       // bNumInterfaces 4
+    XINPUT_CONFIG_DESC_SIZE, 0x00, // wTotalLength 48
+    ADAPTER_PORT_COUNT,       // bNumInterfaces 4
     0x01,       // bConfigurationValue
     0x00,       // iConfiguration (String Index)
     0x80,       // bmAttributes
@@ -79,6 +84,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x20, 0x00, // wMaxPacketSize 32
     0x01,       // bInterval 8 (unit depends on device speed)
 
+    #if(ADAPTER_PORT_COUNT>1)
     // ITF 1
     0x09, // bLength
     0x04, // bDescriptorType (Interface)
@@ -116,7 +122,9 @@ const uint8_t xid_configuration_descriptor[] = {
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
     0x01,       // bInterval 8 (unit depends on device speed)
+    #endif
 
+    #if(ADAPTER_PORT_COUNT>2)
     // ITF 2
     0x09, // bLength
     0x04, // bDescriptorType (Interface)
@@ -154,7 +162,9 @@ const uint8_t xid_configuration_descriptor[] = {
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
     0x01,       // bInterval 8 (unit depends on device speed)
+    #endif
 
+    #if(ADAPTER_PORT_COUNT>3)
     // ITF 3
     0x09, // bLength
     0x04, // bDescriptorType (Interface)
@@ -192,6 +202,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
     0x01,       // bInterval 8 (unit depends on device speed)
+    #endif
 };
 
 // string descriptor table
@@ -367,6 +378,8 @@ bool tud_xinput_n_report(uint8_t instance, void const * report, uint16_t len)
     usbd_edpt_release(0, ep_addr);
 
     //tud_xinput_n_getout(instance);
+
+    return out;
 }
 
 bool tud_xinput_n_ready(uint8_t instance)

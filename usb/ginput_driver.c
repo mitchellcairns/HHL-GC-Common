@@ -6,6 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include "adapter_includes.h"
 #include "ginput_driver.h"
 #include "adapter.h"
 
@@ -137,6 +138,7 @@ const uint8_t ginputslippi_configuration_descriptor[] = {
     U16_TO_U8S_LE(6),
     1,
 };
+
 
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
