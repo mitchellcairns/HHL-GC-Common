@@ -14,6 +14,8 @@
 #include "adapter_types.h"
 
 #if(ADAPTER_MCU_TYPE==MCU_TYPE_RP2040)
+
+    #include "bsp/board.h"
     #include "tusb.h"
 
     #include "pico/stdlib.h"
@@ -33,9 +35,6 @@
     #include "hardware/flash.h"
     #include "hardware/watchdog.h"
     #include "hardware/regs/addressmap.h"
-
-    #include "bsp/board.h"
-    #include "tusb.h"
 #endif 
 
 #if(ADAPTER_MCU_TYPE==MCU_TYPE_ESP32)

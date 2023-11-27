@@ -22,9 +22,10 @@ typedef struct
 {
     // We use a settings version to
     // keep settings between updates
-    uint16_t    settings_version;
-    input_mode_t input_mode;
-    uint8_t     switch_mac_address[4][6];
+    uint16_t        settings_version;
+    bool            adapter_hardware_test;
+    input_mode_t    input_mode;
+    uint8_t         switch_mac_address[4][6];
 
 } adapter_settings_s;
 

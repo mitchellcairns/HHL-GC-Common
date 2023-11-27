@@ -1,5 +1,6 @@
 #include "adapter_includes.h"
-#if(ADAPTER_MCU_TYPE==MCU_TYPE_RP2040)
+
+#if(ADAPTER_MCU_TYPE==1)
 
 volatile bool _save_flag = false;
 adapter_settings_s* _mem_settings_ptr = NULL;
@@ -132,11 +133,10 @@ void adapter_ll_hardware_setup()
     }
 }
 
-uint64_t adapter_ll_get_timestamp_us_32()
+uint32_t adapter_ll_get_timestamp_us()
 {
-    return (uint64_t) time_us_32();
+    return time_us_32();
 }
-
 
 void adapter_ll_usb_task_start()
 {

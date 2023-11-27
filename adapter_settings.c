@@ -31,7 +31,7 @@ bool settings_load()
     printf("Settings version does not match. Resetting... \n");
     settings_reset_to_default();
     settings_save();
-    return false;
+    return true;
   }
 
   _generate_mac();
@@ -47,6 +47,9 @@ void settings_reset_to_default()
   };
   memcpy(&global_loaded_settings, &set, sizeof(adapter_settings_s));
   _generate_mac();
+
+  bool hw_test = cb_adapter_hardware_test();
+  global_loaded_settings.adapter_hardware_test = hw_test;
 }
 
 

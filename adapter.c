@@ -170,6 +170,20 @@ void adapter_main_init()
     if (settings_load())
     {
 
+        if(!global_loaded_settings.adapter_hardware_test)
+        {
+            // Run HW test again
+            if(!cb_adapter_hardware_test())
+            {
+                rgb_set_all(COLOR_ORANGE.color);
+                // Halt
+                for(;;) {}
+            }
+            // Otherwise run normally and save
+            global_loaded_settings.adapter_hardware_test = true;
+            settings_save();
+        }
+
         if (_reboot_mem.reboot_reason == ADAPTER_REBOOT_REASON_MODECHANGE)
         {
             mode = _reboot_mem.adapter_mode;
@@ -187,7 +201,7 @@ void adapter_main_init()
                 break;
 
             case INPUT_MODE_SLIPPI:
-                rgb_set_all(COLOR_PINK.color);
+                rgb_set_all(COLOR_CYAN.color);
                 break;
 
             case INPUT_MODE_XINPUT:
@@ -199,7 +213,12 @@ void adapter_main_init()
                 break;
         }
     }
-    else rgb_set_all(COLOR_RED.color);
+    else 
+    {
+        rgb_set_all(COLOR_ORANGE.color);
+        // Halt
+        for(;;) {}
+    }
 
     rgb_set_dirty();
 

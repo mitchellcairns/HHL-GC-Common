@@ -30,6 +30,9 @@
 extern "C" {
 #endif
 
+#define MCU_TYPE_RP2040 1
+#define MCU_TYPE_ESP32 2
+
 #if(ADAPTER_MCU_TYPE==MCU_TYPE_ESP32)
 
   #define CFG_TUSB_RHPORT0_MODE       OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED
@@ -50,7 +53,7 @@ extern "C" {
   #   define CFG_TUSB_MEM_ALIGN       TU_ATTR_ALIGNED(4)
   #endif
 
-#else
+#elif(ADAPTER_MCU_TYPE==MCU_TYPE_RP2040)
   //--------------------------------------------------------------------
   // COMMON CONFIGURATION
   //--------------------------------------------------------------------

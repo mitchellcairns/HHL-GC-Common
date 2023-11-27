@@ -1,5 +1,6 @@
 #include "adapter_includes.h"
-#if (ADAPTER_MCU_TYPE == MCU_TYPE_ESP32)
+
+#if (ADAPTER_MCU_TYPE == MCU_TYPE)
 #include <stdlib.h>
 #include <stdio.h>
 

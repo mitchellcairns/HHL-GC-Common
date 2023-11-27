@@ -3,6 +3,9 @@
 
 #include "adapter_includes.h"
 
+// This function should return a bool after indicating whether or not a hardware test passed.
+bool cb_adapter_hardware_test();
+
 void adapter_mode_cycle(bool forwards);
 
 input_mode_t adapter_get_current_mode();
