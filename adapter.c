@@ -130,6 +130,33 @@ void adapter_usb_idle(joybus_input_s *input)
   _usb_idle_cb(input);
 }
 
+void adapter_port_status_led(uint32_t timestamp, joybus_input_s *input)
+{
+    static interval_s _i_state = {.last_time = 0, .this_time = 0};
+    static bool _port_plug[4] = {0,0,0,0};
+
+    if(interval_run(timestamp, 100000, &_i_state))
+    {
+        for(uint8_t i = 0; i<ADAPTER_PORT_COUNT; i++)
+        {
+            if(_port_plug[i] != (input[i].port_itf > -1))
+            {
+                _port_plug[i] = (input[i].port_itf > -1);
+
+                if(_port_plug[i])
+                {
+                    rgb_set_single(COLOR_WHITE.color, i);
+                }
+                else
+                {
+                    rgb_set_single(COLOR_RED.color, i);
+                }
+                rgb_set_dirty();
+            }
+        }
+    }
+}
+
 void adapter_comms_task(uint32_t timestamp)
 {
     static interval_s _i_state = {.last_time = 0, .this_time = 0};
@@ -145,6 +172,8 @@ void adapter_comms_task(uint32_t timestamp)
         tud_task();
         #endif
         adapter_usb_idle(_adapter_joybus_inputs);
+
+        adapter_port_status_led(timestamp, _adapter_joybus_inputs);
     }
 
 }
