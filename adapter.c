@@ -50,6 +50,12 @@ void adapter_mode_cycle_task(uint32_t timestamp)
 
     if(interval_run(timestamp, 16000, &_i_state))
     {
+        // Lockout loop. If any interface is greater than -1, do nothing.
+        for(uint8_t i = 0; i < ADAPTER_PORT_COUNT; i++)
+        {
+            if(_adapter_joybus_inputs[i].port_itf>-1) return;
+        }
+
         if(!adapter_ll_gpio_read(ADAPTER_BUTTON_1) && !back_press)
         {
             back_press = true;
