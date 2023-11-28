@@ -34,8 +34,6 @@ bool settings_load()
     return true;
   }
 
-  _generate_mac();
-
   return true;
 }
 
