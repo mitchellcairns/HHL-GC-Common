@@ -18,19 +18,19 @@ uint8_t const *tud_descriptor_device_cb(void)
 {
   switch (adapter_get_current_mode())
   {
-  default:
-  case INPUT_MODE_SWPRO:
-    return (uint8_t const *)&swpro_device_descriptor;
-    break;
+    default:
+    case INPUT_MODE_SWPRO:
+      return (uint8_t const *)&swpro_device_descriptor;
+      break;
 
-  case INPUT_MODE_SLIPPI:
-  case INPUT_MODE_GCADAPTER:
-    return (uint8_t const *)&ginput_device_descriptor;
-    break;
+    case INPUT_MODE_SLIPPI:
+    case INPUT_MODE_GCADAPTER:
+      return (uint8_t const *)&ginput_device_descriptor;
+      break;
 
-  case INPUT_MODE_XINPUT:
-    return (uint8_t const *)&xid_device_descriptor;
-    break;
+    case INPUT_MODE_XINPUT:
+      return (uint8_t const *)&xid_device_descriptor;
+      break;
   }
 }
 
@@ -172,18 +172,18 @@ uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
   (void)instance;
   switch (adapter_get_current_mode())
   {
-  default:
-    return 0;
-    break;
+    default:
+      return 0;
+      break;
 
-  case INPUT_MODE_SWPRO:
-    return swpro_hid_report_descriptor;
-    break;
+    case INPUT_MODE_SWPRO:
+      return swpro_hid_report_descriptor;
+      break;
 
-  case INPUT_MODE_SLIPPI:
-  case INPUT_MODE_GCADAPTER:
-    return gc_hid_report_descriptor;
-    break;
+    case INPUT_MODE_SLIPPI:
+    case INPUT_MODE_GCADAPTER:
+      return gc_hid_report_descriptor;
+      break;
   }
   return NULL;
 }
@@ -397,7 +397,6 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
 
         memcpy(&total_len, desc_ms_os_20 + 8, 2);
         return tud_control_xfer(rhport, request, (void *)(uintptr_t)desc_ms_os_20, total_len);
-        //}
       }
       else
       {

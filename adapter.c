@@ -85,6 +85,9 @@ input_mode_t adapter_get_current_mode()
 
 bool adapter_usb_start(input_mode_t mode)
 {
+
+    _adapter_input_mode = mode;
+
     switch (mode)
     {
     default:
@@ -101,7 +104,7 @@ bool adapter_usb_start(input_mode_t mode)
     case INPUT_MODE_SLIPPI:
         _usb_hid_cb = gcinput_hid_report;
         //_usb_idle_cb = gcinput_hid_idle;
-        adapter_set_interval(500);
+        adapter_set_interval(650);
         break;
 
     case INPUT_MODE_SWPRO:
@@ -116,8 +119,6 @@ bool adapter_usb_start(input_mode_t mode)
         adapter_set_interval(7000);
         break;
     }
-
-    _adapter_input_mode = mode;
 
     return tusb_init();
 }
@@ -279,6 +280,5 @@ void adapter_main_loop()
         rgb_task(_t);
         adapter_comms_task(_t);
         adapter_mode_cycle_task(_t);
-
     }
 }
