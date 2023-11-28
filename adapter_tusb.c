@@ -395,13 +395,6 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
         // Get Microsoft OS 2.0 compatible descriptor
         uint16_t total_len;
 
-        // if(_usb_mode==INPUT_MODE_GCUSB)
-        //{
-        //   memcpy(&total_len, gc_desc_ms_os_20 + 8, 2);
-        //   return tud_control_xfer(rhport, request, (void *)(uintptr_t)gc_desc_ms_os_20, total_len);
-        // }
-        // else
-        //{
         memcpy(&total_len, desc_ms_os_20 + 8, 2);
         return tud_control_xfer(rhport, request, (void *)(uintptr_t)desc_ms_os_20, total_len);
         //}

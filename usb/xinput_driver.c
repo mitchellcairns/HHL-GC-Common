@@ -377,7 +377,7 @@ bool tud_xinput_n_report(uint8_t instance, void const * report, uint16_t len)
     bool out = usbd_edpt_xfer(rhport, ep_addr, _xinputd_itf[instance].epin_buf, len);
     usbd_edpt_release(0, ep_addr);
 
-    //tud_xinput_n_getout(instance);
+    tud_xinput_n_getout(instance);
 
     return out;
 }
