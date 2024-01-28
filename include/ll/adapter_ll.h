@@ -15,5 +15,8 @@ bool adapter_ll_gpio_read(uint32_t gpio);
 void adapter_ll_hardware_setup();
 uint32_t adapter_ll_get_timestamp_us();
 void adapter_ll_usb_task_start();
+void adapter_ll_usb_set_clear();
+void adapter_ll_usb_unset_clear();
+bool adapter_ll_usb_get_clear();
 
 #endif

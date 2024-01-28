@@ -163,8 +163,12 @@ bool adapter_ll_gpio_read(uint32_t gpio)
     else
         regread = REG_READ(GPIO_IN_REG);
 
-    return !util_getbit(regread, gpio);
+    return util_getbit(regread, gpio);
 }
+
+volatile bool _ll_usb_free = false;
+
+static SemaphoreHandle_t boolMutex = NULL;
 
 void adapter_ll_hardware_setup()
 {
@@ -186,8 +190,13 @@ void adapter_ll_hardware_setup()
     //    reset_usb_boot(0, 0);
     //}
 
+    // Create the semaphore
+    boolMutex = xSemaphoreCreateMutex();
+
     // Initialize USB hardware
     _esp32_usb_hardware_init();
+
+    
 }
 
 void adapter_ll_usb_task_start()
@@ -203,4 +212,28 @@ uint32_t adapter_ll_get_timestamp_us()
     if(t>0xFFFFFFFF) t-=0xFFFFFFFF;
     return (uint32_t)t;
 }
+
+void adapter_ll_usb_set_clear()
+{
+    if(xSemaphoreTake(boolMutex, portMAX_DELAY)) {
+        _ll_usb_free = true;
+        xSemaphoreGive(boolMutex);
+    }
+}
+
+void adapter_ll_usb_unset_clear()
+{
+
+    if(xSemaphoreTake(boolMutex, portMAX_DELAY)) {
+        _ll_usb_free = false;
+        xSemaphoreGive(boolMutex);
+    }
+}
+
+bool adapter_ll_usb_get_clear()
+{
+    bool tmp = _ll_usb_free;
+    return tmp;
+}
+
 #endif

@@ -56,6 +56,9 @@
     #include "esp_random.h"
     #include "esp_timer.h"
 
+    // Atomic stuff
+    #include <stdatomic.h>
+
     // Drivers
     #include "driver/gpio.h"
     #include "esp32_neopixel.h"

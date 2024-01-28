@@ -143,4 +143,22 @@ void adapter_ll_usb_task_start()
     // Unused
 }
 
+volatile bool _ll_usb_free = false;
+
+void adapter_ll_usb_set_clear()
+{
+        _ll_usb_free = true;
+}
+
+void adapter_ll_usb_unset_clear()
+{
+        _ll_usb_free = false;
+}
+
+bool adapter_ll_usb_get_clear()
+{
+    bool tmp = _ll_usb_free;
+    return tmp;
+}
+
 #endif

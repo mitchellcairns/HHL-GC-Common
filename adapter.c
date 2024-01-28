@@ -9,29 +9,31 @@ bool _usb_sent_ok = false;
 typedef void (*usb_cb_t)(joybus_input_s *);
 typedef void (*usb_idle_cb_t)(joybus_input_s *);
 
-bool _usb_clear = true;
 usb_cb_t _usb_hid_cb = NULL;
 usb_idle_cb_t _usb_idle_cb = NULL;
 
 bool adapter_usb_is_clear(uint32_t timestamp)
 {
     static interval_s s = {0};
+    bool clear = adapter_ll_usb_get_clear();
 
-    if(interval_resettable_run(timestamp, 100000, _usb_clear, &s))
+    if(interval_resettable_run(timestamp, 100000, clear, &s))
     {
-        _usb_clear = true;
+        adapter_ll_usb_set_clear();
+        return true;
     }
-    return _usb_clear;
+
+    return clear;
 }
 
 void adapter_usb_set_clear()
 {
-    _usb_clear = true;
+    adapter_ll_usb_set_clear();
 }
 
 void adapter_usb_unset_clear()
 {
-    _usb_clear = false;
+    adapter_ll_usb_unset_clear();
 }
 
 void adapter_set_interval(uint32_t interval)
@@ -103,8 +105,8 @@ void adapter_mode_cycle_task(uint32_t timestamp)
 
         if(b1_read && b2_read && !both_press)
         {
-            back_press = false;
             fwd_press = false;
+            back_press = false;
             both_press = true;
         }
         else if (!b1_read && !b2_read && both_press)
@@ -215,25 +217,14 @@ void adapter_comms_task(uint32_t timestamp)
             joybus_itf_poll(&_adapter_joybus_inputs);
             adapter_usb_report(_adapter_joybus_inputs);
         }
-        else
-        {
-            #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
-            tud_task();
-            #endif
-            adapter_usb_idle(_adapter_joybus_inputs);
-
-            adapter_port_status_led(timestamp, _adapter_joybus_inputs);
-        }
     }
-    else 
-    {
-        #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
-        tud_task();
-        #endif
-        adapter_usb_idle(_adapter_joybus_inputs);
+    
+    #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
+    tud_task();
+    #endif
+    adapter_usb_idle(_adapter_joybus_inputs);
 
-        adapter_port_status_led(timestamp, _adapter_joybus_inputs);
-    }
+    adapter_port_status_led(timestamp, _adapter_joybus_inputs);
 
 }
 
