@@ -82,7 +82,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x01,       // bEndpointAddress (OUT/H2D)
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
-    0x01,       // bInterval 8 (unit depends on device speed)
+    0x04,       // bInterval 8 (unit depends on device speed)
 
     #if(ADAPTER_PORT_COUNT>1)
     // ITF 1
@@ -121,7 +121,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x02,       // bEndpointAddress (OUT/H2D)
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
-    0x01,       // bInterval 8 (unit depends on device speed)
+    0x04,       // bInterval 8 (unit depends on device speed)
     #endif
 
     #if(ADAPTER_PORT_COUNT>2)
@@ -161,7 +161,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x03,       // bEndpointAddress (OUT/H2D)
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
-    0x01,       // bInterval 8 (unit depends on device speed)
+    0x04,       // bInterval 8 (unit depends on device speed)
     #endif
 
     #if(ADAPTER_PORT_COUNT>3)
@@ -201,7 +201,7 @@ const uint8_t xid_configuration_descriptor[] = {
     0x04,       // bEndpointAddress (OUT/H2D)
     0x03,       // bmAttributes (Interrupt)
     0x20, 0x00, // wMaxPacketSize 32
-    0x01,       // bInterval 8 (unit depends on device speed)
+    0x04,       // bInterval 8 (unit depends on device speed)
     #endif
 };
 

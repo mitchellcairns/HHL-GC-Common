@@ -9,9 +9,30 @@ bool _usb_sent_ok = false;
 typedef void (*usb_cb_t)(joybus_input_s *);
 typedef void (*usb_idle_cb_t)(joybus_input_s *);
 
-bool _usb_clear = false;
+bool _usb_clear = true;
 usb_cb_t _usb_hid_cb = NULL;
 usb_idle_cb_t _usb_idle_cb = NULL;
+
+bool adapter_usb_is_clear(uint32_t timestamp)
+{
+    static interval_s s = {0};
+
+    if(interval_resettable_run(timestamp, 100000, _usb_clear, &s))
+    {
+        _usb_clear = true;
+    }
+    return _usb_clear;
+}
+
+void adapter_usb_set_clear()
+{
+    _usb_clear = true;
+}
+
+void adapter_usb_unset_clear()
+{
+    _usb_clear = false;
+}
 
 void adapter_set_interval(uint32_t interval)
 {
@@ -47,33 +68,51 @@ void adapter_mode_cycle_task(uint32_t timestamp)
     static interval_s _i_state = {.last_time = 0, .this_time = 0};
     static bool fwd_press = false;
     static bool back_press = false;
+    static bool both_press = false;
 
     if(interval_run(timestamp, 16000, &_i_state))
     {
+        bool b1_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_1);
+        bool b2_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_2);
+
         // Lockout loop. If any interface is greater than -1, do nothing.
         for(uint8_t i = 0; i < ADAPTER_PORT_COUNT; i++)
         {
             if(_adapter_joybus_inputs[i].port_itf>-1) return;
         }
 
-        if(!adapter_ll_gpio_read(ADAPTER_BUTTON_1) && !back_press)
+        if(b1_read && !back_press && !both_press)
         {
             back_press = true;
         }
-        else if(adapter_ll_gpio_read(ADAPTER_BUTTON_1) && back_press)
+        else if(!b1_read && back_press)
         {
             back_press = false;
             adapter_mode_cycle(false);
         }
 
-        if(!adapter_ll_gpio_read(ADAPTER_BUTTON_2) && !fwd_press)
+        if(b2_read && !fwd_press && !both_press)
         {
             fwd_press = true;
         }
-        else if (adapter_ll_gpio_read(ADAPTER_BUTTON_2) && fwd_press)
+        else if (!b2_read && fwd_press)
         {
             fwd_press = false;
             adapter_mode_cycle(true);
+        }
+
+        if(b1_read && b2_read && !both_press)
+        {
+            back_press = false;
+            fwd_press = false;
+            both_press = true;
+        }
+        else if (!b1_read && !b2_read && both_press)
+        {
+            // Save current mode as default
+            settings_set_mode(adapter_get_current_mode());
+            settings_save();
+            both_press = false;
         }
     }
 }
@@ -104,7 +143,7 @@ bool adapter_usb_start(input_mode_t mode)
     case INPUT_MODE_SLIPPI:
         _usb_hid_cb = gcinput_hid_report;
         //_usb_idle_cb = gcinput_hid_idle;
-        adapter_set_interval(650);
+        adapter_set_interval(1);
         break;
 
     case INPUT_MODE_SWPRO:
@@ -116,7 +155,7 @@ bool adapter_usb_start(input_mode_t mode)
     case INPUT_MODE_XINPUT:
         _usb_hid_cb = xinput_hid_report;
         _usb_idle_cb = xinput_hid_idle;
-        adapter_set_interval(7000);
+        adapter_set_interval(1);
         break;
     }
 
@@ -168,10 +207,23 @@ void adapter_comms_task(uint32_t timestamp)
 {
     static interval_s _i_state = {.last_time = 0, .this_time = 0};
 
-    if(interval_run(timestamp, _adapter_interval, &_i_state))
+    if( adapter_usb_is_clear(timestamp) )
     {
-        joybus_itf_poll(&_adapter_joybus_inputs);
-        adapter_usb_report(_adapter_joybus_inputs);
+        if(interval_run(timestamp, _adapter_interval, &_i_state))
+        {
+            adapter_usb_unset_clear();
+            joybus_itf_poll(&_adapter_joybus_inputs);
+            adapter_usb_report(_adapter_joybus_inputs);
+        }
+        else
+        {
+            #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
+            tud_task();
+            #endif
+            adapter_usb_idle(_adapter_joybus_inputs);
+
+            adapter_port_status_led(timestamp, _adapter_joybus_inputs);
+        }
     }
     else 
     {

@@ -3,6 +3,12 @@
 
 #include "adapter_includes.h"
 
+bool adapter_usb_is_clear();
+
+void adapter_usb_set_clear();
+
+void adapter_usb_unset_clear();
+
 // This function should return a bool after indicating whether or not a hardware test passed.
 bool cb_adapter_hardware_test();
 
