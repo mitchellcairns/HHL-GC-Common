@@ -334,6 +334,8 @@ void swpro_hid_idle(joybus_input_s *joybus_data)
     #endif
 }
 
+#define CAP(x, min_val, max_val) ((x) < (min_val) ? (min_val) : ((x) > (max_val) ? (max_val) : (x)))
+
 void swpro_hid_report(joybus_input_s *joybus_data)
 {
   static sw_input_s data[ADAPTER_PORT_COUNT] = {0};
@@ -367,10 +369,32 @@ void swpro_hid_report(joybus_input_s *joybus_data)
     data[itf].t_zl = (joybus_data[i].analog_trigger_l > 60) ? 1 : joybus_data[i].button_l;
     data[itf].t_zr = (joybus_data[i].analog_trigger_r > 60) ? 1 : joybus_data[i].button_r;
 
-    data[itf].ls_x = joybus_data[i].stick_left_x << 4;
-    data[itf].ls_y = joybus_data[i].stick_left_y << 4;
-    data[itf].rs_x = joybus_data[i].stick_right_x << 4;
-    data[itf].rs_y = joybus_data[i].stick_right_y << 4;
+
+    float lx;
+    float ly;
+    float rx;
+    float ry;
+
+    lx = CAP(joybus_data[i].stick_left_x, 28, 228) - 28;
+    ly = CAP(joybus_data[i].stick_left_y, 28, 228) - 28;
+    rx = CAP(joybus_data[i].stick_right_x, 28, 228) - 28;
+    ry = CAP(joybus_data[i].stick_right_y, 28, 228) - 28;
+
+    #define SCALER 20.48f
+    lx *= SCALER;
+    ly *= SCALER;
+    rx *= SCALER;
+    ry *= SCALER;
+
+    lx = CAP(lx, 0, 4095);
+    ly = CAP(ly, 0, 4095);
+    rx = CAP(rx, 0, 4095);
+    ry = CAP(ry, 0, 4095);
+
+    data[itf].ls_x = (uint16_t) lx;
+    data[itf].ls_y = (uint16_t) ly;
+    data[itf].rs_x = (uint16_t) rx;
+    data[itf].rs_y = (uint16_t) ry;
 
     if(joybus_data[i].port_ready)
     {
