@@ -56,8 +56,8 @@ void gcinput_hid_report(joybus_input_s *joybus_data)
         data[itf].cstick_x  = joybus_data[i].stick_right_x;
         data[itf].cstick_y  = joybus_data[i].stick_right_y;
 
-        data[itf].trigger_l = joybus_data[i].analog_trigger_l;
-        data[itf].trigger_r = joybus_data[i].analog_trigger_r;
+        data[itf].trigger_l = (joybus_data[i].button_l) ? 255 : joybus_data[i].analog_trigger_l;
+        data[itf].trigger_r = (joybus_data[i].button_r) ? 255 : joybus_data[i].analog_trigger_r;
     }
 
     if(!_gc_first)
