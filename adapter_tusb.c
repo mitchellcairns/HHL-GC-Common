@@ -12,6 +12,12 @@
 
 /********* TinyUSB HID callbacks ***************/
 
+void tud_suspend_cb(bool remote_wakeup_en)
+{
+  adapter_reboot_memory_u msg = {.adapter_mode = adapter_get_current_mode(), .reboot_reason = ADAPTER_REBOOT_REASON_MODECHANGE};
+  adapter_ll_reboot_with_memory(&msg);
+}
+
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
 uint8_t const *tud_descriptor_device_cb(void)
