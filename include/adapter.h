@@ -3,11 +3,11 @@
 
 #include "adapter_includes.h"
 
-void adapter_usb_sent();
+void adapter_timer_reset();
 
 bool adapter_usb_is_clear();
 
-void adapter_usb_set_clear();
+void adapter_usb_set_clear(uint itf);
 
 void adapter_usb_unset_clear();
 

@@ -141,6 +141,7 @@ typedef struct
 
     int port_itf;
     bool port_ready;
+    bool usb_clear;
 } joybus_input_s;
 
 typedef struct

@@ -9,6 +9,7 @@ typedef void (*usb_idle_cb_t)(joybus_input_s *);
 usb_cb_t _usb_hid_cb = NULL;
 usb_idle_cb_t _usb_idle_cb = NULL;
 
+
 bool adapter_usb_is_clear(uint32_t timestamp)
 {
     static interval_s s = {0};
@@ -16,21 +17,21 @@ bool adapter_usb_is_clear(uint32_t timestamp)
 
     if(interval_resettable_run(timestamp, 100000, clear, &s))
     {
-        adapter_ll_usb_set_clear();
+        adapter_ll_usb_unset_clear(_adapter_joybus_inputs);
         return true;
     }
 
     return clear;
 }
 
-void adapter_usb_set_clear()
+void adapter_usb_set_clear(uint itf)
 {
-    adapter_ll_usb_set_clear();
+    adapter_ll_usb_set_clear(itf, _adapter_joybus_inputs);
 }
 
 void adapter_usb_unset_clear()
 {
-    adapter_ll_usb_unset_clear();
+    adapter_ll_usb_unset_clear(_adapter_joybus_inputs);
 }
 
 // This is how many times 
@@ -222,11 +223,18 @@ void adapter_port_status_led(uint32_t timestamp, joybus_input_s *input)
 interval_s _i_state_timer = {.last_time = 0, .this_time = 0};
 bool _timer_reset = false;
 
+void adapter_timer_reset()
+{
+    if(!_timer_reset)
+        _timer_reset = true;
+}
+
 void adapter_comms_task(uint32_t timestamp)
 {
     if(_timer_reset)
     {
-         joybus_itf_poll(&_adapter_joybus_inputs);
+        joybus_itf_poll(&_adapter_joybus_inputs);
+        _adapter_loop_idx = 0;
         _adapter_loop_idx++;
     }
 

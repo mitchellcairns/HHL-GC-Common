@@ -91,14 +91,14 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_
   case INPUT_MODE_SLIPPI:
     if (report[0] == 0x21)
     {
-      adapter_usb_set_clear();
+      adapter_usb_set_clear(instance);
     }
     break;
 
   case INPUT_MODE_SWPRO:
     if ((report[0] == 0x30))
     {
-      adapter_usb_set_clear();
+      adapter_usb_set_clear(instance);
     }
     break;
 
@@ -107,7 +107,7 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_
   case INPUT_MODE_XINPUT:
     if ((report[0] == 0x00))
     {
-      adapter_usb_set_clear();
+      adapter_usb_set_clear(instance);
     }
 
     break;

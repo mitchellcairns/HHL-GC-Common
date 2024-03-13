@@ -145,14 +145,41 @@ void adapter_ll_usb_task_start()
 
 volatile bool _ll_usb_free = false;
 
-void adapter_ll_usb_set_clear()
+void adapter_ll_usb_set_clear(int8_t itf, joybus_input_s *_adapter_joybus_inputs)
 {
-        _ll_usb_free = true;
+    uint8_t clear = 0x00;
+
+    for(uint i = 0; i < 4; i++)
+    {
+        if(_adapter_joybus_inputs[i].port_itf==itf)
+        {
+            _adapter_joybus_inputs[i].usb_clear = true;
+        }
+    }
+
+    for(uint i = 0; i < 4; i++)
+    {
+        if(_adapter_joybus_inputs[i].port_itf<0)
+        {
+            clear |= (1<<i);
+        }
+        else
+        {
+            clear |= (_adapter_joybus_inputs[i].usb_clear<<i);
+        }
+    }
+
+    _ll_usb_free = (clear==0b1111) ? true : false;
 }
 
-void adapter_ll_usb_unset_clear()
+void adapter_ll_usb_unset_clear(joybus_input_s *_adapter_joybus_inputs)
 {
-        _ll_usb_free = false;
+    for(uint i = 0; i < 4; i++)
+    {
+        _adapter_joybus_inputs[i].usb_clear = false;
+    }
+
+    _ll_usb_free = false;
 }
 
 bool adapter_ll_usb_get_clear()
