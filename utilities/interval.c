@@ -5,6 +5,7 @@
 // IE helps you run functions at set intervals without blocking (as much).
 bool interval_run(uint32_t timestamp, uint32_t interval, interval_s *state)
 {
+
   state->this_time = timestamp;
 
   // Clear variable

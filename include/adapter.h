@@ -3,6 +3,8 @@
 
 #include "adapter_includes.h"
 
+void adapter_usb_sent();
+
 bool adapter_usb_is_clear();
 
 void adapter_usb_set_clear();

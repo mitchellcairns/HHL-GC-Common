@@ -1,10 +1,7 @@
 #include "adapter.h"
 
 input_mode_t _adapter_input_mode = INPUT_MODE_SWPRO;
-uint32_t _adapter_interval = USBRATE_8;
 joybus_input_s *_adapter_joybus_inputs = NULL;
-
-bool _usb_sent_ok = false;
 
 typedef void (*usb_cb_t)(joybus_input_s *);
 typedef void (*usb_idle_cb_t)(joybus_input_s *);
@@ -36,9 +33,26 @@ void adapter_usb_unset_clear()
     adapter_ll_usb_unset_clear();
 }
 
-void adapter_set_interval(uint32_t interval)
+// This is how many times 
+uint8_t _adapter_loop_count = 1;
+uint32_t _adapter_interval = USBRATE_8;
+uint8_t _adapter_loop_idx = 0;
+
+void adapter_set_interval(uint32_t interval, uint8_t loop_count)
 {
-    _adapter_interval = interval;
+    if(interval<=1000)
+    {   
+        _adapter_interval = 10000;
+        _adapter_loop_count = 1;
+        _adapter_loop_idx = 0;
+    }
+    else
+    {
+        _adapter_loop_count = loop_count;
+        _adapter_interval = (interval-380)/loop_count;
+        _adapter_loop_idx = 0;
+    }
+    
 }
 
 void adapter_mode_cycle(bool forwards)
@@ -139,25 +153,25 @@ bool adapter_usb_start(input_mode_t mode)
     case INPUT_MODE_GCADAPTER:
         _usb_hid_cb = gcinput_hid_report;
         _usb_idle_cb = gcinput_hid_idle;
-        adapter_set_interval(7000);
+        adapter_set_interval(USBRATE_8, 8);
         break;
 
     case INPUT_MODE_SLIPPI:
         _usb_hid_cb = gcinput_hid_report;
         //_usb_idle_cb = gcinput_hid_idle;
-        adapter_set_interval(1);
+        adapter_set_interval(USBRATE_1, 1);
         break;
 
     case INPUT_MODE_SWPRO:
         _usb_hid_cb = swpro_hid_report;
         _usb_idle_cb = swpro_hid_idle;
-        adapter_set_interval(7000);
+        adapter_set_interval(USBRATE_8, 8);
         break;
 
     case INPUT_MODE_XINPUT:
         _usb_hid_cb = xinput_hid_report;
         _usb_idle_cb = xinput_hid_idle;
-        adapter_set_interval(1);
+        adapter_set_interval(USBRATE_1, 1);
         break;
     }
 
@@ -205,25 +219,45 @@ void adapter_port_status_led(uint32_t timestamp, joybus_input_s *input)
     }
 }
 
+interval_s _i_state_timer = {.last_time = 0, .this_time = 0};
+bool _timer_reset = false;
+
 void adapter_comms_task(uint32_t timestamp)
 {
-    static interval_s _i_state = {.last_time = 0, .this_time = 0};
+    if(_timer_reset)
+    {
+         joybus_itf_poll(&_adapter_joybus_inputs);
+        _adapter_loop_idx++;
+    }
+
+    // Do nothing
+    if( interval_resettable_run(timestamp, _adapter_interval, _timer_reset, &_i_state_timer) )
+    {
+        if(_adapter_loop_idx < _adapter_loop_count)
+        {
+            joybus_itf_poll(&_adapter_joybus_inputs);
+        }
+        _adapter_loop_idx++;
+    }
+
+    _timer_reset = false;
 
     if( adapter_usb_is_clear(timestamp) )
-    {
-        if(interval_run(timestamp, _adapter_interval, &_i_state))
+    {   
+        if(_adapter_loop_idx >= _adapter_loop_count)
         {
+            _adapter_loop_idx = 0;
+            _timer_reset = true;
             adapter_usb_unset_clear();
-            joybus_itf_poll(&_adapter_joybus_inputs);
             adapter_usb_report(_adapter_joybus_inputs);
         }
     }
+
     
     #if (ADAPTER_MCU_TYPE == MCU_TYPE_RP2040)
     tud_task();
     #endif
     adapter_usb_idle(_adapter_joybus_inputs);
-
     adapter_port_status_led(timestamp, _adapter_joybus_inputs);
 
 }

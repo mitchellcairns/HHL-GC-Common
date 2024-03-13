@@ -72,8 +72,8 @@ typedef struct
 
 typedef enum
 {
-    USBRATE_8 = 7600,
-    USBRATE_1 = 600,
+    USBRATE_8 = 8000,
+    USBRATE_1 = 1000,
 } usb_rate_t;
 
 typedef enum
