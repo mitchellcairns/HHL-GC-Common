@@ -14,8 +14,10 @@
 
 void tud_suspend_cb(bool remote_wakeup_en)
 {
+  #if (ADAPTER_MCU_TYPE == MCU_TYPE_ESP32)
   adapter_reboot_memory_u msg = {.adapter_mode = adapter_get_current_mode(), .reboot_reason = ADAPTER_REBOOT_REASON_MODECHANGE};
   adapter_ll_reboot_with_memory(&msg);
+  #endif
 }
 
 // Invoked when received GET DEVICE DESCRIPTOR
