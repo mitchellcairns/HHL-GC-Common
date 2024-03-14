@@ -96,7 +96,7 @@ void tud_hid_report_complete_cb(uint8_t instance, uint8_t const *report, uint16_
     break;
 
   case INPUT_MODE_SWPRO:
-    if ((report[0] == 0x30))
+    if ((report[0] == 0x30) || (report[0] == 0x21))
     {
       adapter_usb_set_clear(instance);
     }

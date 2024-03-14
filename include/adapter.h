@@ -7,7 +7,7 @@ void adapter_timer_reset();
 
 bool adapter_usb_is_clear();
 
-void adapter_usb_set_clear(uint itf);
+void adapter_usb_set_clear(uint8_t itf);
 
 void adapter_usb_unset_clear();
 

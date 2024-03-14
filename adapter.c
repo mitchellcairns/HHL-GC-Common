@@ -15,7 +15,7 @@ bool adapter_usb_is_clear(uint32_t timestamp)
     static interval_s s = {0};
     bool clear = adapter_ll_usb_get_clear();
 
-    if(interval_resettable_run(timestamp, 100000, clear, &s))
+    if(interval_resettable_run(timestamp, 30000, clear, &s))
     {
         adapter_ll_usb_unset_clear(_adapter_joybus_inputs);
         return true;
@@ -24,7 +24,7 @@ bool adapter_usb_is_clear(uint32_t timestamp)
     return clear;
 }
 
-void adapter_usb_set_clear(uint itf)
+void adapter_usb_set_clear(uint8_t itf)
 {
     adapter_ll_usb_set_clear(itf, _adapter_joybus_inputs);
 }
