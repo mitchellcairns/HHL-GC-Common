@@ -115,19 +115,24 @@ bool adapter_ll_gpio_read(uint32_t gpio)
 
 void adapter_ll_hardware_setup()
 {
-
     stdio_init_all();
 
     gpio_init(ADAPTER_BUTTON_1);
     gpio_pull_up(ADAPTER_BUTTON_1);
     gpio_set_dir(ADAPTER_BUTTON_1, GPIO_IN);
 
+    #if(ADAPTER_BUTTON_2>-1)
     gpio_init(ADAPTER_BUTTON_2);
     gpio_pull_up(ADAPTER_BUTTON_2);
     gpio_set_dir(ADAPTER_BUTTON_2, GPIO_IN);
+    #endif
 
     // Handle early USB bootloader stuff
-    if (!gpio_get(ADAPTER_BUTTON_1) && !gpio_get(ADAPTER_BUTTON_2))
+    if (!gpio_get(ADAPTER_BUTTON_1) 
+    #if(ADAPTER_BUTTON_2>-1) 
+        || !gpio_get(ADAPTER_BUTTON_2) 
+    #endif
+    )
     {
         reset_usb_boot(0, 0);
     }

@@ -89,48 +89,87 @@ void adapter_mode_cycle_task(uint32_t timestamp)
 
     if(interval_run(timestamp, 16000, &_i_state))
     {
-        bool b1_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_1);
-        bool b2_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_2);
+        #if(ADAPTER_BUTTON_2 > -1)
+            bool b1_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_1);
+            bool b2_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_2);
 
-        // Lockout loop. If any interface is greater than -1, do nothing.
-        for(uint8_t i = 0; i < ADAPTER_PORT_COUNT; i++)
-        {
-            if(_adapter_joybus_inputs[i].port_itf>-1) return;
-        }
+            // Lockout loop. If any interface is greater than -1, do nothing.
+            for(uint8_t i = 0; i < ADAPTER_PORT_COUNT; i++)
+            {
+                if(_adapter_joybus_inputs[i].port_itf>-1) return;
+            }
 
-        if(b1_read && !back_press && !both_press)
-        {
-            back_press = true;
-        }
-        else if(!b1_read && back_press)
-        {
-            back_press = false;
-            adapter_mode_cycle(false);
-        }
+            if(b1_read && !back_press && !both_press)
+            {
+                back_press = true;
+            }
+            else if(!b1_read && back_press)
+            {
+                back_press = false;
+                adapter_mode_cycle(false);
+            }
 
-        if(b2_read && !fwd_press && !both_press)
-        {
-            fwd_press = true;
-        }
-        else if (!b2_read && fwd_press)
-        {
-            fwd_press = false;
-            adapter_mode_cycle(true);
-        }
+            if(b2_read && !fwd_press && !both_press)
+            {
+                fwd_press = true;
+            }
+            else if (!b2_read && fwd_press)
+            {
+                fwd_press = false;
+                adapter_mode_cycle(true);
+            }
 
-        if(b1_read && b2_read && !both_press)
-        {
-            fwd_press = false;
-            back_press = false;
-            both_press = true;
-        }
-        else if (!b1_read && !b2_read && both_press)
-        {
-            // Save current mode as default
-            settings_set_mode(adapter_get_current_mode());
-            settings_save();
-            both_press = false;
-        }
+            if(b1_read && b2_read && !both_press)
+            {
+                fwd_press = false;
+                back_press = false;
+                both_press = true;
+            }
+            else if (!b1_read && !b2_read && both_press)
+            {
+                // Save current mode as default
+                settings_set_mode(adapter_get_current_mode());
+                settings_save();
+                both_press = false;
+            }
+        #else
+            bool b1_read = !adapter_ll_gpio_read(ADAPTER_BUTTON_1);
+            static bool _timer_reset = false;
+            static bool _saved = false;
+
+            // Lockout loop. If any interface is greater than -1, do nothing.
+            for(uint8_t i = 0; i < ADAPTER_PORT_COUNT; i++)
+            {
+                if(_adapter_joybus_inputs[i].port_itf>-1) return;
+            }
+
+            if(b1_read && !fwd_press)
+            {
+                fwd_press = true;
+                _timer_reset = true;
+            }
+            else if(b1_read && fwd_press)
+            {
+                static interval_s save_check_state = {0};
+                if(interval_resettable_run(timestamp, 5000000, _timer_reset, &save_check_state))
+                {
+                    // Save current mode as default
+                    settings_set_mode(adapter_get_current_mode());
+                    settings_save();
+                    _saved = true;
+                }
+                _timer_reset = false;
+            }
+            else if(!b1_read && fwd_press)
+            {
+                if(!_saved)
+                {
+                    adapter_mode_cycle(true);
+                }
+                fwd_press = false;
+            }
+
+        #endif
     }
 }
 
